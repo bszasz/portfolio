@@ -13,28 +13,11 @@ import { Http } from '@angular/http';
 })
 export class HomePage {
 
-  private pageTypes = [
-    new SourcePage( "https://www.teletrader.com/",
-    "#Heading div.heading-holder.clearfix h1",
-    "#Heading div.component.security-details div table tbody tr td.cell-first.last span span.last"
-  )];
+  private pageTypes = [];
 
   private proxy = 'https://cors-anywhere.herokuapp.com/'  
 
-  private items = [
-    new PortfolioItem(
-      'https://www.teletrader.com/fidelity-fd-glob-technology-a-acc-usd/funds/details/FU_100049764',
-      this.pageTypes[0], 12.14, 126.69)
-    ,
-    new PortfolioItem(
-      'https://www.teletrader.com/jpm-us-technology-a-acc-usd/funds/details/FU_100010194',
-      this.pageTypes[0], 0, 0)
-      ,
-    new PortfolioItem(
-        'https://www.teletrader.com/pioneer-fd-u-s-fund-gro-a-nd-usd/funds/details/FU_100024783',
-      this.pageTypes[0], 0, 0)
-      ,
-    ]
+  private items = []
   
 
   constructor(public navCtrl: NavController, public http:Http, private storage: Storage, public alertCtrl: AlertController) {
@@ -117,7 +100,7 @@ export class HomePage {
           text: 'Save',
           handler: data => {
             let index = this.items.indexOf(item);
-            let newItem = new PortfolioItem(data.url,this.pageTypes[0], data.originalValue, data.originalAmount)
+            let newItem = new PortfolioItem(data.url,item.type, data.originalValue, data.originalAmount)
             this.getItem(newItem);
             if (index > -1) {
               this.items[index] = newItem;
@@ -139,5 +122,48 @@ export class HomePage {
     }
   }
 
-
+  settings() {
+    
+        let prompt = this.alertCtrl.create({
+          title: 'Load JSON settings',
+          subTitle: 'You can use https://jsonblob.com to create a portfolio descriptor JSON.',
+          inputs: [{
+            name: 'url',
+            placeholder: 'http://',
+            type: 'url'
+          }],
+          buttons: [
+            {
+              text: 'Cancel'
+            },
+            {
+              text: 'Save',
+              handler: data => {
+                this.http.get(data.url)
+                .subscribe(data => {
+                  let json = data.json();
+                  console.log(json);
+                  this.pageTypes = [];
+                  for (var i of json.pageTypes) {
+                    let newType = new SourcePage(i.site,i.name, i.value);
+                    console.log(newType);
+                    this.pageTypes.push(newType);
+                  }
+                  this.items = [];
+                  for (var i of json.items) {
+                    let newItem = new PortfolioItem(i.url,this.pageTypes[i.pageType], i.originalValue, i.originalAmount)
+                    console.log(newItem);
+                    this.items.push(newItem);
+                    this.getItem(newItem);
+                  }
+                }, (error: any) => {
+                  console.log("error downloading settings", error)
+                });
+                      
+              }
+            }
+          ]
+        });
+        prompt.present();
+      }
 }
