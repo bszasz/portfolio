@@ -1,0 +1,17 @@
+{
+  "pageTypes": [
+    {
+      "site": "https://www.teletrader.com/",
+      "name": "#Heading div.heading-holder.clearfix h1",
+      "value": "#Heading div.component.security-details div table tbody tr td.cell-first.last span span.last"
+    }
+  ],
+  "items": [
+    {
+      "url": "https://www.teletrader.com/apple-inc/stocks/details/tts-831814",
+      "pageType": 0,
+      "originalValue": 150,
+      "originalAmount": 100
+    }
+  ]
+}
